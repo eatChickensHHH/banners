@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        html,body,ul,ol{
+            margin: 0;
+            padding:0;
+        }
+        ul,ol{
+            list-style: none;
+        }
+        .wrapper{
+            width: 600px;
+            border:10px solid green;
+        }
+        .wrapper .banner{
+            width: 600px;
+            height: 300px;
+            position: relative;
+        }
+        .wrapper .banner .pic{
+            width: 600px;
+            height: 300px;
+            overflow: hidden; 
+            position: relative;  
+        }
+        .wrapper .banner .pic ul{
+            width: 5000px;  /* 宽度够大就行 */
+        }
+        .wrapper .banner .pic ul li{
+            width: 600px;
+            height: 300px;
+            float: left;
+        }
+        .wrapper .banner .pic ul li img{
+            display: block;
+            width:100%;
+            height:100%;
+        }
+        .wrapper .banner .dot{
+            width:600px;
+            height:20px;
+            position: absolute;
+            left:0;
+            bottom:10px;
+            text-align: center;
+            z-index: 1;
+        }
+        .wrapper .banner .dot ol{
+             margin:auto; 
+             display: inline-block;
+        }
+        .wrapper .banner .dot ol li{
+            width:20px;
+            height: 20px;
+            margin-left: 5px;
+            float: left;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        .wrapper .banner .dot ol li.active{
+            background: red;
+        }
+        .wrapper .banner .control{
+            width:600px;
+            position: absolute;
+            top:50%;
+            left: 0;
+            margin-top:-25px;
+        }
+        .wrapper .banner .control>div{
+            width: 25px;
+            height: 50px;
+            background: red;
+        }
+        .wrapper .banner .control .next{
+            float: right;
+            margin-right: 5px;
+        }
+        .next::after{
+            content:">";
+            display: block;
+            width: 25px;
+            height: 50px;
+            line-height: 50px;
+            font-size: 30px;
+            text-align: center;
+        }
+        .wrapper .banner .control .prev{
+            float: left;
+            margin-left: 5px;
+        }
+        .prev::after{
+            content:"<";
+            display: block;
+            width: 25px;
+            height: 50px;
+            line-height: 50px;
+            font-size: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="banner">
+            <div class="pic">
+                <ul>
+                <!-- 动态创建 -->
+                </ul>
+            </div>
+         
+            <div class="dot">
+                <ol>
+                 <!-- 动态创建 -->
+                </ol>
+            </div>
+            <div class="control">
+                <div class="next"></div>
+                <div class="prev"></div>
+            </div>
+        </div>
+    </div>
+    <script src="./js/jquery.min.js"></script>
+    <script>
+        $(function(){
+        // 创建相关元素
+        function pic(n){  
+            var html1=''
+            var html2=''
+            for(var i=0;i<n;i++){
+                html1 +='<li><a href=""><img src="./images/'+(i+1)+'.jpg" alt=""></a></li>'// 动态创建图片
+                html2 +='<li></li>' // 动态创建导航点
+            }
+            $("ul").html(html1+'<li><a href=""><img src="./images/1.jpg" alt=""></a></li>')
+            $("ol").html(html2)    
+        }
+        pic(5);  //调用函数
+
+
+        // 实现无缝连接：首先在最后一张图片添加第一张图片，根据索引值来控制图片和导航点的状态
+
+
+        // 创建好元素之后，获取元素
+        var key1=0  //图片索引值
+        var key2=0    //导航点索引值
+        var c1=$("ul li").length    
+        var c2=$("ol li").length
+        var w=600    //图片宽度
+        
+        $("ol li").eq(0).addClass("active")  //设置默认样式
+
+        // 切换导航点
+        function changeDot(){
+            // 先把所有样式清除,再把指定位置高亮
+            $("ol li").eq(key2).addClass("active").siblings().removeClass("active")
+        }
+
+        //点击切换上一张或下一张
+        function nextPic(){
+            key1++
+            key2++
+            if(key1>c1-1){
+                key1=1
+                $("ul").css("marginLeft","0")
+            }
+            if(key2>c2-1){
+                key2=0
+            }
+            $("ul").animate({
+                marginLeft:-key1*w
+            },500)
+            changeDot()    
+        }
+        function  prevPic(){
+            key1--
+            key2--
+            if(key1<0){
+                key1=c2-1    
+                $("ul").css("margin-left",-c2*w+'px')
+            }
+            if(key2<0){
+                key2=c2-1
+            }
+            $("ul").animate({
+                marginLeft:-key1*w
+            },500)
+            changeDot() 
+        }
+        $(".next").click(nextPic)
+        $(".prev").click(prevPic)
+        
+        // 点击导航点切换图片
+            $("ol li").click(function(){
+               key1=key2=$(this).index()
+               $("ul").animate({
+                marginLeft:-key2*w
+            },1000)
+               changeDot()
+            })
+        
+
+        // 自动播放
+        var timer=setInterval(nextPic,2500)//设置时间要比图片播放时间快一点
+        // 鼠标移入停止自动播放// 鼠标移出开始自动播放
+        $(".banner").hover(
+            function(){
+                clearInterval(timer)
+                return
+            },function(){
+            timer=setInterval(nextPic,1500)
+            }
+        )
+    
+    })
+    </script>
+</body>
+</html>
